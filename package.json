@@ -1,0 +1,29 @@
+{
+  "name": "redmine-charts",
+  "version": "1.0.0",
+  "description": "",
+  "main": "lib/server",
+  "types": "lib/server",
+  "scripts": {
+    "start": "npm run build:live",
+    "build:live": "nodemon --exec \".\\node_modules\\.bin\\ts-node\" src/server.ts"
+  },
+  "author": "famaridon",
+  "license": "MIT",
+  "dependencies": {
+    "@types/cron": "^1.2.1",
+    "@types/express": "^4.0.35",
+    "@types/mysql": "0.0.33",
+    "@types/node": "^7.0.29",
+    "mysql": "^2.13.0",
+    "reflect-metadata": "^0.1.10",
+    "typeorm": "0.1.0-alpha.8"
+  },
+  "devDependencies": {
+    "@types/cron": "^1.2.1",
+    "@types/node": "^7.0.29",
+    "nodemon": "^1.11.0",
+    "ts-node": "^3.0.6",
+    "typescript": "^2.3.4"
+  }
+}

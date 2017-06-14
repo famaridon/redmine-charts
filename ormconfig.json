@@ -1,0 +1,17 @@
+[
+  {
+    "name": "default",
+    "driver": {
+      "type": "mysql",
+      "host": "localhost",
+      "port": 3306,
+      "username": "root",
+      "password": "manager",
+      "database": "redmine_charts"
+    },
+    "autoSchemaSync": true,
+    "entities": [
+      "src/entities/*.ts"
+    ]
+  }
+]
