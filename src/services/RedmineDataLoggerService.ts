@@ -1,7 +1,7 @@
 import cron = require('cron');
 import {Connection, Repository, ObjectLiteral} from "typeorm";
 import {RedmineService, VersionStatus, Version, Issue} from './RedmineService'
-import {ChartEntity} from '../entities/ChartEntity'
+import {ChartEntity, ChartType} from '../entities/ChartEntity'
 import {IterationEntity} from '../entities/IterationEntity'
 import {DataEntity} from '../entities/DataEntity'
 
@@ -26,9 +26,8 @@ export class RedmineDataLoggerService {
     this.dataRepository = connection.getRepository(DataEntity);
   }
 
-  public async startLogBurndownInPoint(version: Version){
+  public async initIteration(version: Version): Promise<IterationEntity>{
     console.log("Check if version is find as iteration");
-
     var iteration = await this.iterationRepository.findOne(<ObjectLiteral>{externalId: version.id});
     if(!iteration) {
       iteration = new IterationEntity();
@@ -37,19 +36,27 @@ export class RedmineDataLoggerService {
       await this.iterationRepository.persist(iteration);
       console.log(`Iteration ${version.name} created`);
     }
+    return iteration
+  }
 
+  public async initChart(iteration: IterationEntity, type: ChartType): Promise<ChartEntity>{
     console.log("Check if chart is find on this iteration");
-    var chart = await this.chartRepository.findOne(<ObjectLiteral>{iteration: iteration.id, type: "burndown"});
+    var chart = await this.chartRepository.findOne(<ObjectLiteral>{iteration: iteration.id, type: type});
     if(!chart ) {
       chart = new ChartEntity();
       chart.iteration = iteration;
-      chart.type = "burndown";
+      chart.type = type;
       await this.chartRepository.persist(chart);
       console.log(`Chart ${chart.type} created on iteration ${iteration.name}`);
     }
+    return chart;
+  }
 
+  public async startLogBurndownInPoint(version: Version){
+    var iteration = await this.initIteration(version);
+    var chart = await this.initChart(iteration, "burndown");
     new CronJob('* * * * * *', () => {
-      this.logBurndownInPoint(version, <IterationEntity>iteration,<ChartEntity> chart);
+      this.logBurndownInPoint(version,iteration,chart);
     }, () => {}, true, 'America/Los_Angeles');
   }
 
@@ -84,17 +91,3 @@ export class RedmineDataLoggerService {
     console.log(`donne ration ${done_ratio}`);
   }
 }
-
-/*
-let chartEntity = new ChartEntity();
-chartEntity.name = "Me and Bears";
-
-connection.manager
-.persist(chartEntity)
-.then(photo => {
-console.log("chartEntity has been saved");
-})
-.catch(error => {
-console.log(error)
-});
-*/
