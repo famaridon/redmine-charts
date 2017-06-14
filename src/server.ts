@@ -1,5 +1,6 @@
 import "reflect-metadata";
 
+import * as winston from "winston";
 import * as express from "express";
 import * as path from "path";
 import {createConnection } from "typeorm";
@@ -13,6 +14,7 @@ class Server {
   public dataLogger: RedmineDataLoggerService;
 
   public static async bootstrap(config: any): Promise<Server> {
+    winston.info('Now my debug messages are written to the console!');
     let redmine = new RedmineService(config);
     let connection = await createConnection();
     let dataLogger = new RedmineDataLoggerService(redmine, connection);
