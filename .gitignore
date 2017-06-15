@@ -58,3 +58,5 @@ typings/
 .env
 
 src/configuration.json
+
+ormconfig.json

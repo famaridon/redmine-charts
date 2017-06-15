@@ -2,7 +2,6 @@ import "reflect-metadata";
 
 import * as winston from "winston";
 import * as express from "express";
-import * as bodyParser from "body-parser";
 import * as path from "path";
 
 import {RedmineDataLoggerService} from './services/RedmineDataLoggerService'
