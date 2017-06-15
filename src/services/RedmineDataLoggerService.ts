@@ -1,6 +1,7 @@
 import cron = require('cron');
 import {RedmineService, VersionStatus, Version, Issue} from './RedmineService'
 import {EntitiesService} from './EntitiesServices'
+import {ConfigurationService} from './ConfigurationService'
 import {ChartEntity, ChartType} from '../entities/ChartEntity'
 import {IterationEntity} from '../entities/IterationEntity'
 import {DataEntity} from '../entities/DataEntity'
@@ -16,25 +17,32 @@ export class RedmineDataLoggerService {
 
   protected redmineService: RedmineService;
   protected entitiesService: EntitiesService;
+  protected configurationService: ConfigurationService;
+  protected jobs: cron.CronJob[] = new Array<cron.CronJob>();
 
-  private constructor(redmineService: RedmineService,entitiesService: EntitiesService) {
+  private constructor(redmineService: RedmineService,entitiesService: EntitiesService, configurationService: ConfigurationService) {
     this.redmineService = redmineService;
     this.entitiesService = entitiesService;
+    this.configurationService = configurationService;
   }
 
   public static async getInstance() : Promise<RedmineDataLoggerService> {
     if(!RedmineDataLoggerService._instance) {
       let redmineService = await RedmineService.getInstance();
       let entitiesService = await EntitiesService.getInstance();
-      RedmineDataLoggerService._instance = new RedmineDataLoggerService(redmineService, entitiesService);
+      let configurationService = await ConfigurationService.getInstance();
+      RedmineDataLoggerService._instance = new RedmineDataLoggerService(redmineService, entitiesService, configurationService);
     }
     return RedmineDataLoggerService._instance;
   }
 
   public start(){
-    new CronJob('0 * * * * *', () => {
+    let burndownCron = this.configurationService.getCron("burndown");
+    console.log(`start burndown cron ${burndownCron}`);
+    let burndown = new CronJob(burndownCron, () => {
       this.logBurndownInPoint();
     }, () => {}, true);
+    this.jobs.push(burndown);
   }
 
   private async logBurndownInPoint(){

@@ -1,3 +1,5 @@
+import {ChartType} from '../entities/ChartEntity'
+
 export class ConfigurationService {
 
   private static _instance:ConfigurationService = new ConfigurationService();
@@ -17,6 +19,10 @@ export class ConfigurationService {
 
   public getRedmineHttp(): any{
     return this.configuration.redmine.http;
+  }
+
+  public getCron(type: ChartType): string{
+    return this.configuration.cron[type];
   }
 
 }
