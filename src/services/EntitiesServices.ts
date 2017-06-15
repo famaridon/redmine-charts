@@ -5,14 +5,14 @@ import {ChartEntity, ChartType} from '../entities/ChartEntity'
 import {IterationEntity} from '../entities/IterationEntity'
 import {DataEntity} from '../entities/DataEntity'
 
-export class EnititiesService {
+export class EntitiesService {
 
-  private static _instance:EnititiesService;
+  private static _instance:EntitiesService;
 
   protected connection: Connection;
-  protected iterationRepository: Repository<IterationEntity>;
-  protected chartRepository: Repository<ChartEntity>;
-  protected dataRepository: Repository<DataEntity>;
+  public iterationRepository: Repository<IterationEntity>;
+  public chartRepository: Repository<ChartEntity>;
+  public dataRepository: Repository<DataEntity>;
 
   private constructor(connection: Connection) {
     this.connection = connection;
@@ -21,14 +21,13 @@ export class EnititiesService {
     this.dataRepository = connection.getRepository(DataEntity);
   }
 
-  public static async getInstance() : Promise<EnititiesService> {
-    if(!EnititiesService._instance) {
+  public static async getInstance() : Promise<EntitiesService> {
+    if(!EntitiesService._instance) {
       let connection = await createConnection();
-      EnititiesService._instance = new EnititiesService(connection);
+      EntitiesService._instance = new EntitiesService(connection);
     }
-    return EnititiesService._instance;
+    return EntitiesService._instance;
   }
-
 
   public async getIteration(version: Version): Promise<IterationEntity>{
     console.log("Check if version is find as iteration");

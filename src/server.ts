@@ -18,9 +18,8 @@ class Server {
 
   public static async bootstrap(): Promise<Server> {
     winston.info('Now my debug messages are written to the console!');
-    let redmine = new RedmineService();
-    let connection = await createConnection();
-    let dataLogger = new RedmineDataLoggerService(redmine, connection);
+    let redmine = await RedmineService.getInstance();
+    let dataLogger = await RedmineDataLoggerService.getInstance();
     return new Server(redmine, dataLogger);
   }
 

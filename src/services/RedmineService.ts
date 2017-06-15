@@ -5,14 +5,26 @@ export * from './beans/Redmine'
 
 export class RedmineService {
 
-  protected configuration: any;
+  private static _instance:RedmineService;
 
-  constructor() {
-    this.configuration = ConfigurationService.getInstance().getRedmineHttp();
+  protected configurationService: ConfigurationService;
+  protected httpConfiguration: any;
+
+  constructor(configurationService: ConfigurationService) {
+    this.configurationService= configurationService;
+    this.httpConfiguration= this.configurationService.getRedmineHttp();
+  }
+
+  public static async getInstance() : Promise<RedmineService> {
+    if(!RedmineService._instance) {
+      let configurationService = await ConfigurationService.getInstance();
+      RedmineService._instance = new RedmineService(configurationService);
+    }
+    return RedmineService._instance;
   }
 
   listIssues(version: Version, filters?: any): Promise<Array<Issue>> {
-    let requestConfiguration = Object.assign({}, this.configuration);
+    let requestConfiguration = Object.assign({}, this.httpConfiguration);
     let filtersQuery: string = "";
     if( filters ) {
       for(var filter in filters) {
@@ -38,7 +50,7 @@ export class RedmineService {
   }
 
   findProject(project: number | string): Promise<any> {
-    let requestConfiguration = Object.assign({}, this.configuration);
+    let requestConfiguration = Object.assign({}, this.httpConfiguration);
     requestConfiguration.path = `/projects/${project}.json?include=trackers,versions`;
     requestConfiguration.method= 'GET';
 
@@ -46,7 +58,7 @@ export class RedmineService {
   }
 
   findVersions(project: number | string): Promise<Array<Version>> {
-    let requestConfiguration = Object.assign({}, this.configuration);
+    let requestConfiguration = Object.assign({}, this.httpConfiguration);
     requestConfiguration.path = `/projects/${project}/versions.json`;
     requestConfiguration.method= 'GET';
     return new Promise<Array<Version>>((resolve, reject) => {

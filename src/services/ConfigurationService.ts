@@ -11,7 +11,7 @@ export class ConfigurationService {
     this.configuration = require('../configuration.json');
   }
 
-  public static getInstance() : ConfigurationService {
+  public static async getInstance() : Promise<ConfigurationService> {
     return ConfigurationService._instance;
   }
 
