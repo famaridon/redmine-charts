@@ -11,9 +11,9 @@ var CronTime = cron.CronTime;
 var timeZone = 'America/Los_Angeles';
 
 export class RedmineDataLoggerService {
+
   protected redmine: RedmineService;
   protected connection: Connection;
-
   protected iterationRepository: Repository<IterationEntity>;
   protected chartRepository: Repository<ChartEntity>;
   protected dataRepository: Repository<DataEntity>;
@@ -26,7 +26,7 @@ export class RedmineDataLoggerService {
     this.dataRepository = connection.getRepository(DataEntity);
   }
 
-  public async initIteration(version: Version): Promise<IterationEntity>{
+  public async getIteration(version: Version): Promise<IterationEntity>{
     console.log("Check if version is find as iteration");
     var iteration = await this.iterationRepository.findOne(<ObjectLiteral>{externalId: version.id});
     if(!iteration) {
@@ -39,7 +39,7 @@ export class RedmineDataLoggerService {
     return iteration
   }
 
-  public async initChart(iteration: IterationEntity, type: ChartType): Promise<ChartEntity>{
+  public async getChart(iteration: IterationEntity, type: ChartType): Promise<ChartEntity>{
     console.log("Check if chart is find on this iteration");
     var chart = await this.chartRepository.findOne(<ObjectLiteral>{iteration: iteration.id, type: type});
     if(!chart ) {
@@ -52,10 +52,14 @@ export class RedmineDataLoggerService {
     return chart;
   }
 
+  public async getDatas(chart: ChartEntity): Promise<DataEntity[]>{
+    return this.dataRepository.find(<ObjectLiteral>{chart: chart.id});
+  }
+
   public async startLogBurndownInPoint(version: Version){
-    var iteration = await this.initIteration(version);
-    var chart = await this.initChart(iteration, "burndown");
-    new CronJob('* * * * * *', () => {
+    var iteration = await this.getIteration(version);
+    var chart = await this.getChart(iteration, "burndown");
+    new CronJob('0 1 * * * *', () => {
       this.logBurndownInPoint(version,iteration,chart);
     }, () => {}, true, 'America/Los_Angeles');
   }

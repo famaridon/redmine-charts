@@ -17,6 +17,7 @@
     "@types/mysql": "0.0.33",
     "@types/node": "^7.0.29",
     "@types/winston": "^2.3.3",
+    "body-parser": "^1.17.2",
     "cron": "^1.2.1",
     "express": "^4.15.3",
     "mysql": "^2.13.0",
@@ -25,6 +26,7 @@
     "winston": "^2.3.1"
   },
   "devDependencies": {
+    "@types/body-parser": "^1.16.3",
     "@types/cron": "^1.2.1",
     "@types/node": "^7.0.29",
     "nodemon": "^1.11.0",

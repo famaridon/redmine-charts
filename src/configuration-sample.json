@@ -1,0 +1,7 @@
+{
+  "protocol" : "https:",
+  "host": "localhost",
+  "headers": {
+    "X-Redmine-API-Key": "d8bdb....7f7dcc4"
+  }
+}
