@@ -1,4 +1,3 @@
-import {CorsOptions} from "cors";
 import {ChartType} from '../entities/ChartEntity'
 
 export class ConfigurationService {
