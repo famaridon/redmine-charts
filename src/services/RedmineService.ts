@@ -1,13 +1,14 @@
 import * as https from 'https'
 import {VersionStatus, Version, Issue} from './beans/Redmine'
+import {ConfigurationService} from './ConfigurationService'
 export * from './beans/Redmine'
 
 export class RedmineService {
 
   protected configuration: any;
 
-  constructor(configuration: any) {
-    this.configuration = configuration;
+  constructor() {
+    this.configuration = ConfigurationService.getInstance().getRedmineHttp();
   }
 
   listIssues(version: Version, filters?: any): Promise<Array<Issue>> {

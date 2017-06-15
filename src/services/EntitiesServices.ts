@@ -1,30 +1,34 @@
-import cron = require('cron');
+import {createConnection } from "typeorm";
 import {Connection, Repository, ObjectLiteral} from "typeorm";
 import {RedmineService, VersionStatus, Version, Issue} from './RedmineService'
 import {ChartEntity, ChartType} from '../entities/ChartEntity'
 import {IterationEntity} from '../entities/IterationEntity'
 import {DataEntity} from '../entities/DataEntity'
 
-var CronJob = cron.CronJob;
-var CronTime = cron.CronTime;
+export class EnititiesService {
 
-var timeZone = 'America/Los_Angeles';
+  private static _instance:EnititiesService;
 
-export class RedmineDataLoggerService {
-
-  protected redmine: RedmineService;
   protected connection: Connection;
   protected iterationRepository: Repository<IterationEntity>;
   protected chartRepository: Repository<ChartEntity>;
   protected dataRepository: Repository<DataEntity>;
 
-  constructor(redmine: RedmineService, connection: Connection) {
-    this.redmine = redmine;
+  private constructor(connection: Connection) {
     this.connection = connection;
     this.iterationRepository = connection.getRepository(IterationEntity);
     this.chartRepository = connection.getRepository(ChartEntity);
     this.dataRepository = connection.getRepository(DataEntity);
   }
+
+  public static async getInstance() : Promise<EnititiesService> {
+    if(!EnititiesService._instance) {
+      let connection = await createConnection();
+      EnititiesService._instance = new EnititiesService(connection);
+    }
+    return EnititiesService._instance;
+  }
+
 
   public async getIteration(version: Version): Promise<IterationEntity>{
     console.log("Check if version is find as iteration");
@@ -56,43 +60,4 @@ export class RedmineDataLoggerService {
     return this.dataRepository.find(<ObjectLiteral>{chart: chart.id});
   }
 
-  public start(){
-    new CronJob('0 * * * * *', () => {
-      this.logBurndownInPoint();
-    }, () => {}, true);
-  }
-
-  private async logBurndownInPoint(){
-    let version = await this.redmine.findCurrentVersions("moovapps-process-team");
-    let iteration = await this.getIteration(version);
-    let chart = await this.getChart(iteration, "burndown");
-    console.log(`add point to iteration "${iteration.name}"`);
-    let issues: Issue[] = await this.redmine.listIssues(version, {tracker_id: 36, status_id:'*', per_page:500});
-    let duePoint: number = 0;
-    issues.forEach((issue) =>{
-      let cf = issue.getCustomField(28);
-      if(cf != null){
-        let points = cf.value;
-        duePoint += points * (1 - (issue.done_ratio /100));
-      }
-    })
-    let data = new DataEntity();
-    data.chart = chart;
-    data.date = new Date();
-    data.value = duePoint;
-    this.dataRepository.persist(data);
-    console.log(`due points ${duePoint}`);
-  }
-
-  private async logDoneRatio(version: Version, iteration: IterationEntity){
-    console.log(`add point to iteration "${iteration.name}"`);
-    let issues: Issue[] = await this.redmine.listIssues(version, {tracker_id: 36, status_id:'*', per_page:500});
-    let done_ratio: number = 0;
-    issues.forEach((issue) =>{
-      console.log(`issue ${issue.id} donne_ration ${issue.done_ratio}`);
-      done_ratio += issue.done_ratio;
-    })
-    done_ratio = done_ratio / issues.length;
-    console.log(`donne ration ${done_ratio}`);
-  }
 }

@@ -4,12 +4,9 @@ import * as winston from "winston";
 import * as express from "express";
 import * as bodyParser from "body-parser";
 import * as path from "path";
-import {createConnection } from "typeorm";
 import {RedmineDataLoggerService} from './services/RedmineDataLoggerService'
 import {RedmineService, Version} from './services/RedmineService'
 import {ApiRoute} from './api/ApiRoute'
-
-var configuration = require('./configuration.json');
 
 class Server {
 
@@ -19,9 +16,9 @@ class Server {
   public dataLogger: RedmineDataLoggerService;
   public api: ApiRoute;
 
-  public static async bootstrap(config: any): Promise<Server> {
+  public static async bootstrap(): Promise<Server> {
     winston.info('Now my debug messages are written to the console!');
-    let redmine = new RedmineService(config);
+    let redmine = new RedmineService();
     let connection = await createConnection();
     let dataLogger = new RedmineDataLoggerService(redmine, connection);
     return new Server(redmine, dataLogger);
@@ -38,17 +35,18 @@ class Server {
   }
 
   public async start(): Promise<void>{
-    let version = this.redmine.findCurrentVersions("moovapps-process-team")
-    this.dataLogger.startLogBurndownInPoint(await version);
+    this.dataLogger.start();
+
     this.app.get('/', (req, res) => {
       res.send('Hello World!');
     });
+
     this.app.listen(3000, () => {
       console.log('Example app listening on port 3000!');
     });
   }
 }
 
-Server.bootstrap(configuration).then((server) => {
+Server.bootstrap().then((server) => {
   server.start();
 })
