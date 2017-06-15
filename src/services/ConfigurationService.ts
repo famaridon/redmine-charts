@@ -22,9 +22,10 @@ export class ConfigurationService {
     return this.configuration.redmine.http;
   }
 
-  public getCorsOptions(): CorsOptions{
-    return this.configuration.api.cors;
+  public getAPIOptions(): any{
+    return this.configuration.api;
   }
+
 
   public getCron(type: ChartType): string{
     return this.configuration.cron[type];

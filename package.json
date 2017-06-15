@@ -7,6 +7,7 @@
   "types": "lib/server",
   "scripts": {
     "start": "npm run build:live",
+    "start:deamon": "./node_modules/.bin/ts-node src/server.ts",
     "build:live": "nodemon --exec \".\\node_modules\\.bin\\ts-node\" src/server.ts"
   },
   "author": "famaridon",
@@ -24,15 +25,11 @@
     "mysql": "^2.13.0",
     "reflect-metadata": "^0.1.10",
     "typeorm": "0.1.0-alpha.8",
+    "ts-node": "^3.0.6",
+    "typescript": "^2.3.4",
     "winston": "^2.3.1"
   },
   "devDependencies": {
-    "@types/body-parser": "^1.16.3",
-    "@types/cors": "^2.8.1",
-    "@types/cron": "^1.2.1",
-    "@types/node": "^7.0.29",
-    "nodemon": "^1.11.0",
-    "ts-node": "^3.0.6",
-    "typescript": "^2.3.4"
+    "nodemon": "^1.11.0"
   }
 }
