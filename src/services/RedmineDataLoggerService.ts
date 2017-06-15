@@ -40,7 +40,7 @@ export class RedmineDataLoggerService {
     let burndownCron = this.configurationService.getCron("burndown");
     console.log(`start burndown cron ${burndownCron}`);
     let burndown = new CronJob(burndownCron, () => {
-      this.logBurndownInPoint();
+      this.logBurndownInPoint().catch((error) => {console.log(error);});
     }, () => {}, true);
     this.jobs.push(burndown);
   }

@@ -4,10 +4,13 @@ import * as winston from "winston";
 import * as express from "express";
 import * as bodyParser from "body-parser";
 import * as path from "path";
+
 import {RedmineDataLoggerService} from './services/RedmineDataLoggerService'
 import {RedmineService, Version} from './services/RedmineService'
 import {EntitiesService} from './services/EntitiesServices'
+import {ConfigurationService} from './services/ConfigurationService'
 import {ApiRoute} from './api/ApiRoute'
+
 
 class Server {
 
@@ -41,6 +44,7 @@ class Server {
     this.app.get('/', (req, res) => {
       res.send('Hello World!');
     });
+
 
     this.app.listen(3000, () => {
       console.log('Example app listening on port 3000!');

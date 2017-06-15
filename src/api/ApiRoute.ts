@@ -10,8 +10,10 @@ export class ApiRoute  {
   private redmineService: RedmineService;
   private entitiesService: EntitiesService;
 
-  constructor(router: Router, redmine: RedmineService,entitiesService: EntitiesService) {
+  constructor(router: Router, redmineService: RedmineService, entitiesService: EntitiesService) {
     //log
+    this.redmineService = redmineService;
+    this.entitiesService = entitiesService;
     console.log("[IndexRoute::create] Creating index route.");
     this.router = router;
     this.router.route('/charts/:version/:type')
@@ -31,6 +33,7 @@ export class ApiRoute  {
     datas.forEach((item) => {
       chartjs_data.push({x: item.date, y: item.value})
     });
+    res.header("Access-Control-Allow-Origin", "*");
     res.json(chartjs_data);
   }
 

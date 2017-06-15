@@ -1,3 +1,4 @@
+import {CorsOptions} from "cors";
 import {ChartType} from '../entities/ChartEntity'
 
 export class ConfigurationService {
@@ -19,6 +20,10 @@ export class ConfigurationService {
 
   public getRedmineHttp(): any{
     return this.configuration.redmine.http;
+  }
+
+  public getCorsOptions(): CorsOptions{
+    return this.configuration.api.cors;
   }
 
   public getCron(type: ChartType): string{
