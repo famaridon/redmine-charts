@@ -14,11 +14,14 @@ export class ApiRoute  {
     //log
     this.redmineService = redmineService;
     this.entitiesService = entitiesService;
-    console.log("[IndexRoute::create] Creating index route.");
     this.router = router;
     this.router.route('/charts/:version/:type')
     .get((req: Request, res: Response, next: NextFunction) => {
       this.getChart(req, res);
+    });
+    this.router.route('/charts/:version')
+    .get((req: Request, res: Response, next: NextFunction) => {
+      this.getVersion(req, res);
     });
   }
 
@@ -35,6 +38,12 @@ export class ApiRoute  {
     });
     res.header("Access-Control-Allow-Origin", "*");
     res.json(chartjs_data);
+  }
+
+  private async getVersion(req: Request, res: Response):Promise<void> {
+    let version = await this.redmineService.findCurrentVersions("moovapps-process-team");
+    res.header("Access-Control-Allow-Origin", "*");
+    res.json(version);
   }
 
 }
