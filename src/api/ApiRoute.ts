@@ -1,20 +1,19 @@
 import { NextFunction, Request, Response, Router } from "express";
 import {RedmineDataLoggerService} from '../services/RedmineDataLoggerService'
 import {RedmineService, Version} from '../services/RedmineService'
+import {EntitiesService} from '../services/EntitiesServices'
 import {ChartType} from '../entities/ChartEntity'
 
 export class ApiRoute  {
 
   private router: Router;
-  private datas: RedmineDataLoggerService;
-  private redmine: RedmineService;
+  private redmineService: RedmineService;
+  private entitiesService: EntitiesService;
 
-  constructor(router: Router, redmine: RedmineService, datas: RedmineDataLoggerService) {
+  constructor(router: Router, redmine: RedmineService,entitiesService: EntitiesService) {
     //log
     console.log("[IndexRoute::create] Creating index route.");
     this.router = router;
-    this.redmine = redmine;
-    this.datas = datas;
     this.router.route('/charts/:version/:type')
     .get((req: Request, res: Response, next: NextFunction) => {
       this.getChart(req, res);
@@ -24,10 +23,10 @@ export class ApiRoute  {
   private async getChart(req: Request, res: Response):Promise<void> {
     let type: ChartType = req.params.type;
     // TODO : hard coded project
-    let version = await this.redmine.findCurrentVersions("moovapps-process-team");
-    let iteration = await this.datas.getIteration(version);
-    let chart = await this.datas.getChart(iteration, type);
-    let datas = await this.datas.getDatas(chart);
+    let version = await this.redmineService.findCurrentVersions("moovapps-process-team");
+    let iteration = await this.entitiesService.getIteration(version);
+    let chart = await this.entitiesService.getChart(iteration, type);
+    let datas = await this.entitiesService.getDatas(chart);
     let chartjs_data = new Array<any>();
     datas.forEach((item) => {
       chartjs_data.push({x: item.date, y: item.value})

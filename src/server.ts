@@ -6,6 +6,7 @@ import * as bodyParser from "body-parser";
 import * as path from "path";
 import {RedmineDataLoggerService} from './services/RedmineDataLoggerService'
 import {RedmineService, Version} from './services/RedmineService'
+import {EntitiesService} from './services/EntitiesServices'
 import {ApiRoute} from './api/ApiRoute'
 
 class Server {
@@ -18,18 +19,19 @@ class Server {
 
   public static async bootstrap(): Promise<Server> {
     winston.info('Now my debug messages are written to the console!');
-    let redmine = await RedmineService.getInstance();
-    let dataLogger = await RedmineDataLoggerService.getInstance();
-    return new Server(redmine, dataLogger);
+    let redmineService = await RedmineService.getInstance();
+    let redmineDataLoggerService = await RedmineDataLoggerService.getInstance();
+    let entitiesService = await EntitiesService.getInstance();
+    return new Server(redmineService,entitiesService, redmineDataLoggerService);
   }
 
-  constructor(redmine: RedmineService, dataLogger:RedmineDataLoggerService ) {
+  constructor(redmine: RedmineService,entitiesService: EntitiesService, redmineDataLoggerService:RedmineDataLoggerService ) {
     //create expressjs application
     this.app = express();
     this.router = express.Router();
     this.redmine = redmine;
-    this.dataLogger = dataLogger;
-    this.api= new ApiRoute(this.router, this.redmine, this.dataLogger);
+    this.dataLogger = redmineDataLoggerService;
+    this.api= new ApiRoute(this.router, this.redmine, entitiesService);
     this.app.use('/api', this.router);
   }
 
