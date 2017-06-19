@@ -66,7 +66,7 @@ export class ApiRoute  {
     let withBusinessValue: number = 0;
     issues.forEach((issue: Issue) => {
       let businessValue: CustomField | null = issue.getCustomField(24);
-      if(businessValue != null) {
+      if(businessValue != null && businessValue.value != "") {
         withBusinessValue++;
       }
     })
