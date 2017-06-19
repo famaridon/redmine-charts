@@ -49,7 +49,7 @@ export class RedmineService {
     });
   }
 
-  findProject(project: number | string): Promise<any> {
+  async findProject(project: number | string): Promise<any> {
     let requestConfiguration = Object.assign({}, this.httpConfiguration);
     requestConfiguration.path = `/projects/${project}.json?include=trackers,versions`;
     requestConfiguration.method= 'GET';
@@ -57,7 +57,7 @@ export class RedmineService {
     return this.request(requestConfiguration);
   }
 
-  findVersions(project: number | string): Promise<Array<Version>> {
+  async findVersions(project: number | string): Promise<Array<Version>> {
     let requestConfiguration = Object.assign({}, this.httpConfiguration);
     requestConfiguration.path = `/projects/${project}/versions.json`;
     requestConfiguration.method= 'GET';
@@ -71,24 +71,29 @@ export class RedmineService {
     });
   }
 
-  findCurrentVersions(project: number | string): Promise<Version> {
-    return new Promise<Version>((resolve, reject) => {
-      this.findVersions("moovapps-process-team")
-      .then((versions: Array<Version>) => {
-        // filter open versions
-        versions = versions.filter(function(version: Version){
-          return version.status === "open";
-        });
-        // sort by due date
-        versions.sort((a: Version, b: Version) =>  {
-          return a.due_date.getTime() - b.due_date.getTime();
-        });
-        resolve(versions[0]);
-      })
-      .catch((reason) => {
-        reject(reason);
-      });
-    });
+  async findCurrentVersions(project: number | string): Promise<Version> {
+    let versions: Array<Version> = await this.findVersions(project);
+    versions = versions.filter(this.filterOpenVersion);
+    // sort by due date
+    versions.sort(this.sortVersions);
+    return versions[0];
+
+  }
+
+  async findNextVersions(project: number | string): Promise<Version> {
+    let versions: Array<Version> = await this.findVersions(project);
+    versions = versions.filter(this.filterOpenVersion);
+    // sort by due date
+    versions.sort(this.sortVersions);
+    return versions[1];
+
+  }
+
+  private filterOpenVersion(version: Version): boolean{
+    return version.status === "open";
+  }
+  private sortVersions(a: Version, b: Version): number{
+    return a.due_date.getTime() - b.due_date.getTime();
   }
 
   private request(configuration: any): Promise<any> {
