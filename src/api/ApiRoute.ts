@@ -55,6 +55,8 @@ export class ApiRoute  {
     res.header("Access-Control-Allow-Origin", "*");
     if(type === "UserStoryWithBusinessValue"){
       this.getUserStoryWithBusinessValue(req,res);
+    } else if(type === "UserStoryWithPoints"){
+      this.getUserStoryWithPoints(req,res);
     } else {
       res.statusCode = 404;
     }
@@ -72,6 +74,20 @@ export class ApiRoute  {
     })
     res.header("Access-Control-Allow-Origin", "*");
     res.json({percentage: (withBusinessValue /issues.length) * 100 });
+  }
+
+  private async getUserStoryWithPoints(req: Request, res: Response):Promise<void> {
+    let version = await this.redmineService.findNextVersions("moovapps-process-team");
+    let issues: Issue[] = await this.redmineService.listIssues(version, {tracker_id: 36, status_id:'*', per_page:500});
+    let withPoints: number = 0;
+    issues.forEach((issue: Issue) => {
+      let points: CustomField | null = issue.getCustomField(28);
+      if(points != null && points.value != "") {
+        withPoints++;
+      }
+    })
+    res.header("Access-Control-Allow-Origin", "*");
+    res.json({percentage: (withPoints /issues.length) * 100 });
   }
 
 }
