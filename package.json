@@ -7,7 +7,7 @@
   "types": "lib/server",
   "scripts": {
     "start": "npm run build:live",
-    "start:deamon": "./node_modules/.bin/ts-node src/server.ts",
+    "start:daemon": "./node_modules/.bin/ts-node src/server.ts",
     "build:live": "nodemon --exec \".\\node_modules\\.bin\\ts-node\" src/server.ts"
   },
   "author": "famaridon",
