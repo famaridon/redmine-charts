@@ -18,4 +18,4 @@ export class ChartEntity {
     datas: DataEntity[];
 }
 
-export type ChartType = "burndown";
+export type ChartType = "burndown" | "prioritization";

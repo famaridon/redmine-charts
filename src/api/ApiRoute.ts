@@ -31,17 +31,66 @@ export class ApiRoute  {
 
   private async getChart(req: Request, res: Response):Promise<void> {
     let type: ChartType = req.params.type;
-    // TODO : hard coded project
-    let version = await this.redmineService.findCurrentVersions("moovapps-process-team");
+    let versionString: string = req.params.version;
+    let version: Version ;
+    switch (versionString){
+      case "current":
+      {
+        version = await this.redmineService.findCurrentVersions("moovapps-process-team");
+        break;
+      }
+      case "next":
+      {
+        version = await this.redmineService.findNextVersions("moovapps-process-team");
+        break;
+      }
+      default:
+      res.status(404);
+      return;
+    }
+
+    let result: Promise<any>;
+    switch(type) {
+      case "burndown" : {
+        result = this.buildBurndown(version);
+        break;
+      }
+      case "prioritization" : {
+        result = this.buildPrioritization(version);
+        break;
+      }
+      default:
+      res.status(404);
+      return;
+    }
+
+    res.header("Access-Control-Allow-Origin", "*");
+    res.json(await result);
+  }
+
+  private async buildBurndown(version: Version):Promise<any> {
     let iteration = await this.entitiesService.getIteration(version);
-    let chart = await this.entitiesService.getChart(iteration, type);
+    let chart = await this.entitiesService.getChart(iteration, "burndown");
     let datas = await this.entitiesService.getDatas(chart);
     let chartjs_data = new Array<any>();
     datas.forEach((item) => {
       chartjs_data.push({x: item.date, y: item.value})
     });
-    res.header("Access-Control-Allow-Origin", "*");
-    res.json(chartjs_data);
+    return chartjs_data;
+  }
+
+  private async buildPrioritization(version: Version):Promise<any> {
+    let userSories = await this.redmineService.listIssues(version, {tracker_id: 36, status_id:'open', per_page:500});
+    let chartjs_data = new Array<any>();
+    userSories.forEach((item) => {
+      let bv = item.getCustomField(24);
+      let points = item.getCustomField(28);
+      if(bv != null && points !=  null) {
+        chartjs_data.push({x:bv.value , y: points.value});
+      }
+
+    });
+    return chartjs_data;
   }
 
   private async getVersion(req: Request, res: Response):Promise<void> {
