@@ -86,7 +86,7 @@ export class ApiRoute  {
       let bv = item.getCustomField(24);
       let points = item.getCustomField(28);
       if(bv != null && points !=  null) {
-        chartjs_data.push({x:bv.value , y: points.value, r: 30});
+        chartjs_data.push({x:bv.value , y: points.value, r: 20});
       }
 
     });
