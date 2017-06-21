@@ -33,10 +33,15 @@ export class Issue {
     let cf: CustomField | null = null;
     this.custom_fields.forEach((item) => {
       if (item.id === id){
-        cf= item;
+        cf = item;
         return ;
       }
     });
+    if(cf != null ){
+      if((<CustomField>cf).value == "" || (<CustomField>cf).value == null) {
+        cf = null;
+      }
+    }
     return cf;
   }
 }
