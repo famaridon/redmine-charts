@@ -50,7 +50,7 @@ export class RedmineDataLoggerService {
     let iteration = await this.entitiesService.getIteration(version);
     let chart = await this.entitiesService.getChart(iteration, "burndown");
     console.log(`add point to iteration "${iteration.name}"`);
-    let issues: Issue[] = await this.redmineService.listIssues(version, {tracker_id: 36, status_id:'*', per_page:500});
+    let issues: Issue[] = await this.redmineService.listIssues(version, {tracker_id: 36, status_id:'*', limit:500});
     let duePoint: number = 0;
     issues.forEach((issue) =>{
       let cf = issue.getCustomField(28);
@@ -69,7 +69,7 @@ export class RedmineDataLoggerService {
 
   private async logDoneRatio(version: Version, iteration: IterationEntity){
     console.log(`add point to iteration "${iteration.name}"`);
-    let issues: Issue[] = await this.redmineService.listIssues(version, {tracker_id: 36, status_id:'*', per_page:500});
+    let issues: Issue[] = await this.redmineService.listIssues(version, {tracker_id: 36, status_id:'*', limit:500});
     let done_ratio: number = 0;
     issues.forEach((issue) =>{
       console.log(`issue ${issue.id} donne_ration ${issue.done_ratio}`);
