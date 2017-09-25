@@ -124,6 +124,8 @@ export class RedmineService {
       });
 
       req.on('error', (e: any) => {
+        console.log("Request to redmine server fail");
+        console.log(e);
         reject(e);
       });
 
