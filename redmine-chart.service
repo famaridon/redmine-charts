@@ -1,6 +1,5 @@
 [Unit]
 Description=Visiativ redmine chart 
-Requires=After=docker.service       # Requires the mysql service to run first
 
 [Service]
 ExecStart=/usr/bin/git pull && /usr/bin/npm start
