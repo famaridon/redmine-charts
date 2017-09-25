@@ -8,7 +8,8 @@
   "scripts": {
     "start": "npm run build:live",
     "start:daemon": "./node_modules/.bin/ts-node src/server.ts",
-    "build:live": "nodemon --exec \".\\node_modules\\.bin\\ts-node\" src/server.ts"
+    "build:live": "nodemon --exec \".\\node_modules\\.bin\\ts-node\" src/server.ts";
+    "serve": "nodemon --exec \"./node_modules/.bin/ts-node\" src/server.ts"
   },
   "author": "famaridon",
   "license": "MIT",
