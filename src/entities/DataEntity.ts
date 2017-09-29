@@ -16,4 +16,10 @@ export class DataEntity {
     @ManyToOne(type => ChartEntity, chart => chart.datas)
     chart: ChartEntity;
 
+    constructor(chart: ChartEntity, value: number){
+      this.chart = chart;
+      this.value = value;
+      this.date = new Date();
+    }
+
 }

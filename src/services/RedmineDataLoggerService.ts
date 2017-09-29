@@ -48,23 +48,33 @@ export class RedmineDataLoggerService {
   private async logBurndownInPoint(){
     let version = await this.redmineService.findCurrentVersions("moovapps-process-team");
     let iteration = await this.entitiesService.getIteration(version);
-    let chart = await this.entitiesService.getChart(iteration, "burndown");
     console.log(`add point to iteration "${iteration.name}"`);
     let issues: Issue[] = await this.redmineService.listIssues(version, {tracker_id: 36, status_id:'*', limit:500});
     let duePoint: number = 0;
+    let duePointByCategory: Map<number,number> = new Map();
     issues.forEach((issue) =>{
-      let cf = issue.getCustomField(28);
+      let cf = issue.getCustomField(28); // 28 is point
       if(cf != null){
         let points = cf.value;
-        duePoint += points * (1 - (issue.done_ratio /100));
+        let pointRemaining = points * (1 - (issue.done_ratio /100));
+        duePoint += pointRemaining;
+        // add by category
+        let categoryDuePoint = duePointByCategory.get(issue.category.id);
+        if(!categoryDuePoint) { // init category
+          categoryDuePoint = 0;
+        }
+        duePointByCategory.set(issue.category.id, categoryDuePoint + pointRemaining);
       }
     })
-    let data = new DataEntity();
-    data.chart = chart;
-    data.date = new Date();
-    data.value = duePoint;
-    this.entitiesService.dataRepository.persist(data);
+
+    let chart = await this.entitiesService.getChart(iteration, "burndown");
+    this.entitiesService.dataRepository.persist(new DataEntity(chart, duePoint));
     console.log(`due points ${duePoint}`);
+    duePointByCategory.forEach(async (value: number, key: number) => {
+      let categoryChart = await this.entitiesService.getChart(iteration, `burndown-${key}`);
+      this.entitiesService.dataRepository.persist(new DataEntity(categoryChart, value));
+      console.log(`${key} have ${value} due points.`);
+    });
   }
 
   private async logDoneRatio(version: Version, iteration: IterationEntity){
