@@ -1,24 +1,57 @@
 import "reflect-metadata";
-import {createConnection } from "typeorm";
+
+import * as winston from "winston";
+import * as express from "express";
+import * as path from "path";
+
 import {RedmineDataLoggerService} from './services/RedmineDataLoggerService'
 import {RedmineService, Version} from './services/RedmineService'
+import {EntitiesService} from './services/EntitiesServices'
+import {ConfigurationService} from './services/ConfigurationService'
+import {ApiRoute} from './api/ApiRoute'
 
-var configuration = {
-  protocol : 'https:',
-  host: 'projects.visiativ.com',
-  headers: {
-    'X-Redmine-API-Key': '817e6b7df101a989b12aa1de1a44726c635bcb88'
+
+class Server {
+
+  public app: express.Application;
+  public router: express.Router;
+  public redmine: RedmineService;
+  public dataLogger: RedmineDataLoggerService;
+  public configurationService: ConfigurationService;
+  public api: ApiRoute;
+
+  public static async bootstrap(): Promise<Server> {
+    winston.info('bootstrap server and init all services.');
+    let redmineService = await RedmineService.getInstance();
+    let redmineDataLoggerService = await RedmineDataLoggerService.getInstance();
+    let entitiesService = await EntitiesService.getInstance();
+    let configurationService = await ConfigurationService.getInstance();
+    return new Server(redmineService,entitiesService, redmineDataLoggerService, configurationService);
   }
-};
 
-var redmine = new RedmineService(configuration);
-var dataLogger: RedmineDataLoggerService ;
+  constructor(redmine: RedmineService,entitiesService: EntitiesService, redmineDataLoggerService:RedmineDataLoggerService, configurationService: ConfigurationService ) {
+    //create expressjs application
+    this.app = express();
+    this.router = express.Router();
+    this.redmine = redmine;
+    this.configurationService = configurationService;
+    this.dataLogger = redmineDataLoggerService;
+    this.api= new ApiRoute(this.router, this.redmine, entitiesService);
+    this.app.use('/api', this.router);
+  }
 
-createConnection().then(connection => {
-  dataLogger = new RedmineDataLoggerService(redmine, connection);
-  redmine.findCurrentVersions("moovapps-process-team").then((version: Version) => {
-    dataLogger.startLogBurndownInPoint(version);
-  });
-}).catch(error => {
-  console.log(error)
-});
+  public async start(): Promise<void>{
+    winston.info('starting server.');
+    this.dataLogger.start();
+
+    let apiOption = this.configurationService.getAPIOptions();
+    this.app.listen(apiOption.port, () => {
+      winston.info(`api is ready on http://localhost:${apiOption.port}/api/`);
+    });
+    winston.info('server started');
+  }
+}
+
+Server.bootstrap().then((server) => {
+  server.start();
+})

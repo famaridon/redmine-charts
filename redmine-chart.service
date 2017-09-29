@@ -1,0 +1,20 @@
+[Unit]
+Description=Visiativ redmine chart 
+
+[Service]
+ExecStart=/usr/bin/git pull && /usr/bin/npm start
+# Required on some systems
+WorkingDirectory=/opt/redmine-charts
+Restart=always
+ # Restart service after 10 seconds if node service crashes
+ RestartSec=10
+ # Output to syslog
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=nodejs-example
+#User=<alternate user>
+#Group=<alternate group>
+#Environment=NODE_ENV=production PORT=1337
+
+[Install]
+WantedBy=multi-user.target

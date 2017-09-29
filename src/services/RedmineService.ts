@@ -1,17 +1,30 @@
 import * as https from 'https'
 import {VersionStatus, Version, Issue} from './beans/Redmine'
+import {ConfigurationService} from './ConfigurationService'
 export * from './beans/Redmine'
 
 export class RedmineService {
 
-  protected configuration: any;
+  private static _instance:RedmineService;
 
-  constructor(configuration: any) {
-    this.configuration = configuration;
+  protected configurationService: ConfigurationService;
+  protected httpConfiguration: any;
+
+  constructor(configurationService: ConfigurationService) {
+    this.configurationService= configurationService;
+    this.httpConfiguration= this.configurationService.getRedmineHttp();
+  }
+
+  public static async getInstance() : Promise<RedmineService> {
+    if(!RedmineService._instance) {
+      let configurationService = await ConfigurationService.getInstance();
+      RedmineService._instance = new RedmineService(configurationService);
+    }
+    return RedmineService._instance;
   }
 
   listIssues(version: Version, filters?: any): Promise<Array<Issue>> {
-    let requestConfiguration = Object.assign({}, this.configuration);
+    let requestConfiguration = Object.assign({}, this.httpConfiguration);
     let filtersQuery: string = "";
     if( filters ) {
       for(var filter in filters) {
@@ -36,16 +49,16 @@ export class RedmineService {
     });
   }
 
-  findProject(project: number | string): Promise<any> {
-    let requestConfiguration = Object.assign({}, this.configuration);
+  async findProject(project: number | string): Promise<any> {
+    let requestConfiguration = Object.assign({}, this.httpConfiguration);
     requestConfiguration.path = `/projects/${project}.json?include=trackers,versions`;
     requestConfiguration.method= 'GET';
 
     return this.request(requestConfiguration);
   }
 
-  findVersions(project: number | string): Promise<Array<Version>> {
-    let requestConfiguration = Object.assign({}, this.configuration);
+  async findVersions(project: number | string): Promise<Array<Version>> {
+    let requestConfiguration = Object.assign({}, this.httpConfiguration);
     requestConfiguration.path = `/projects/${project}/versions.json`;
     requestConfiguration.method= 'GET';
     return new Promise<Array<Version>>((resolve, reject) => {
@@ -58,24 +71,29 @@ export class RedmineService {
     });
   }
 
-  findCurrentVersions(project: number | string): Promise<Version> {
-    return new Promise<Version>((resolve, reject) => {
-      this.findVersions("moovapps-process-team")
-      .then((versions: Array<Version>) => {
-        // filter open versions
-        versions = versions.filter(function(version: Version){
-          return version.status === "open";
-        });
-        // sort by due date
-        versions.sort((a: Version, b: Version) =>  {
-          return a.due_date.getTime() - b.due_date.getTime();
-        });
-        resolve(versions[0]);
-      })
-      .catch((reason) => {
-        reject(reason);
-      });
-    });
+  async findCurrentVersions(project: number | string): Promise<Version> {
+    let versions: Array<Version> = await this.findVersions(project);
+    versions = versions.filter(this.filterOpenVersion);
+    // sort by due date
+    versions.sort(this.sortVersions);
+    return versions[0];
+
+  }
+
+  async findNextVersions(project: number | string): Promise<Version> {
+    let versions: Array<Version> = await this.findVersions(project);
+    versions = versions.filter(this.filterOpenVersion);
+    // sort by due date
+    versions.sort(this.sortVersions);
+    return versions[1];
+
+  }
+
+  private filterOpenVersion(version: Version): boolean{
+    return version.status === "open";
+  }
+  private sortVersions(a: Version, b: Version): number{
+    return a.due_date.getTime() - b.due_date.getTime();
   }
 
   private request(configuration: any): Promise<any> {
@@ -106,6 +124,8 @@ export class RedmineService {
       });
 
       req.on('error', (e: any) => {
+        console.log("Request to redmine server fail");
+        console.log(e);
         reject(e);
       });
 
