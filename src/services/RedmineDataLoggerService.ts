@@ -70,7 +70,6 @@ export class RedmineDataLoggerService {
     let chart = await this.entitiesService.getChart(iteration, "burndown");
     this.entitiesService.dataRepository.persist(new DataEntity(chart, duePoint));
     console.log(`due points ${duePoint}`);
-    console.dir(duePointByCategory);
     duePointByCategory.forEach(async (value: number, key: number) => {
       let categoryChart = await this.entitiesService.getChart(iteration, `burndown-${key}`);
       this.entitiesService.dataRepository.persist(new DataEntity(categoryChart, value));
