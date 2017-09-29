@@ -63,7 +63,7 @@ export class RedmineDataLoggerService {
         if(!categoryDuePoint) { // init category
           categoryDuePoint = 0;
         }
-        duePointByCategory.set(issue.category.id, categoryDuePoint + duePoint);
+        duePointByCategory.set(issue.category.id, categoryDuePoint + pointRemaining);
       }
     })
 
