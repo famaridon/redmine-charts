@@ -50,16 +50,11 @@ export class ApiRoute  {
     }
 
     let result: Promise<any>;
-    switch(type) {
-      case "burndown" : {
-        result = this.buildBurndown(version);
-        break;
-      }
-      case "prioritization" : {
-        result = this.buildPrioritization(version);
-        break;
-      }
-      default:
+    if(type.startsWith("burndown")){
+      result = this.buildBurndown(type, version);
+    } else if(type === "prioritization") {
+      result = this.buildPrioritization(version);
+    } else {
       res.status(404);
       return;
     }
@@ -68,9 +63,9 @@ export class ApiRoute  {
     res.json(await result);
   }
 
-  private async buildBurndown(version: Version):Promise<any> {
+  private async buildBurndown(burndown:string, version: Version):Promise<any> {
     let iteration = await this.entitiesService.getIteration(version);
-    let chart = await this.entitiesService.getChart(iteration, "burndown");
+    let chart = await this.entitiesService.getChart(iteration, burndown);
     let datas = await this.entitiesService.getDatas(chart);
     let chartjs_data = new Array<any>();
     datas.forEach((item) => {
