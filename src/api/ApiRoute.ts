@@ -68,7 +68,9 @@ export class ApiRoute  {
     let chart = await this.entitiesService.getChart(iteration, burndown);
     let datas = await this.entitiesService.getDatas(chart);
     let chartjs_data = new Array<any>();
-    datas.forEach((item) => {
+    datas.sort((a, b) => {
+      return a.date.getTime() - b.date.getTime();
+    }).forEach((item) => {
       chartjs_data.push({x: item.date, y: item.value})
     });
     return chartjs_data;

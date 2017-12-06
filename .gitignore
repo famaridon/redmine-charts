@@ -60,3 +60,5 @@ typings/
 src/configuration.json
 
 ormconfig.json
+
+.idea
