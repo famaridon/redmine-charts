@@ -94,9 +94,9 @@ export class RedmineService {
   }
   private sortVersions(a: Version, b: Version): number{
     if(!a.due_date) {
-      return -1;
-    } else if (!b.due_date){
       return 1;
+    } else if (!b.due_date){
+      return -1;
     }
     return a.due_date.getTime() - b.due_date.getTime();
   }
